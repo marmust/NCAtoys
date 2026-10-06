@@ -39,7 +39,7 @@ class NCAEditor:
         *,
         fps: float = 30.0,
         steps_per_frame: int = 1,
-        scale: int = 8,
+        scale: int = 2,
         value_range: tuple[float, float] = (0.0, 1.0),
         paint_value: float = 1.0,
         erase_value: float = 0.0,
