@@ -1,3 +1,13 @@
+###################################
+#                                 #
+#   #    #  #####  ####   #####   #
+#   #    #    #    #  #   #####   #
+#    #  #     #    ### #  #       #
+#     #     #####  ####   #####   #
+#                                 #
+###################################
+# vibecoded slop - dont ask me
+
 """
 Minimal NCA editor / viewer.
 
@@ -14,7 +24,7 @@ Brush: the color picker sets channels 0, 1, 2 and the "hidden ch" slider sets ev
 past 2 (both in display units, 0..1 across value_range). Erase writes erase_value into every channel.
 
 Tuner (only if the sim has a train method):
-    sim.train(world, region, lr, encouragement, epochs) -> loss
+    sim.train(world, region, lr, epochs) -> loss
     world is a copy of the full (C, H, W) state, region is (y0, x0, y1, x1), end-exclusive.
     Drag a square on the grid to select it, then press "Train" (or T), or tick
     "train every sim frame" to train once per frame while the sim runs.
@@ -54,7 +64,7 @@ class NCAEditor:
         *,
         fps: float = 30.0,
         steps_per_frame: int = 1,
-        scale: int = 8,
+        scale: int = 2,
         value_range: tuple[float, float] = (0.0, 1.0),
         paint_value: float = 1.0,
         erase_value: float = 0.0,
@@ -110,7 +120,6 @@ class NCAEditor:
         self.tool = "brush"
         self.tune_lr = float(tune_lr)
         self.tune_epochs = int(tune_epochs)
-        self.encourage = True
         self.train_every_frame = False
         self.min_selection = max(1, min(int(min_selection), self.h, self.w))
         self.selection: Optional[tuple[int, int, int, int]] = None  # (y0, x0, y1, x1), end-exclusive
@@ -209,7 +218,7 @@ class NCAEditor:
     def _train(self) -> None:
         # outside inference mode, on a plain copy: the sim may build a graph from it
         loss = self.sim.train(self.state.clone(), self.selection,
-                              self.tune_lr, self.encourage, self.tune_epochs)
+                              self.tune_lr, self.tune_epochs)
         self._last_loss = None if loss is None else float(loss)
 
     # ----------------------------------------------------------------- display
@@ -451,10 +460,6 @@ class NCAEditor:
                                                  callback=lambda s, v: setattr(self, "hidden_brightness", v))
 
                     with dpg.group(tag="tuner_group", show=False):
-                        dpg.add_radio_button(["encourage", "discourage"], default_value="encourage",
-                                             horizontal=True,
-                                             callback=lambda s, v: setattr(self, "encourage",
-                                                                           v == "encourage"))
                         dpg.add_input_float(label="lr", default_value=self.tune_lr, width=150,
                                             format="%.5f", step=1e-4,
                                             callback=lambda s, v: setattr(self, "tune_lr", max(0.0, v)))
